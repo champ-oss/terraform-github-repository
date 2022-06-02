@@ -13,7 +13,7 @@ concurrency: this
 env:
   TF_INPUT: false
   TF_IN_AUTOMATION: true
-  GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.CHAMP_TESTING_GITHUB_TOKEN }}
   GITHUB_OWNER: "champ-testing"
 
 defaults:
