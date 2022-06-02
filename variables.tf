@@ -6,7 +6,7 @@ variable "name" {
 variable "visibility" {
   description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository#visibility"
   type        = string
-  default     = "internal"
+  default     = "private"
 }
 
 variable "has_issues" {
