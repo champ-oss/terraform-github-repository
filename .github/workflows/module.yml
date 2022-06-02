@@ -13,13 +13,8 @@ concurrency: this
 env:
   TF_INPUT: false
   TF_IN_AUTOMATION: true
-  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  MONGODB_ATLAS_PRIVATE_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}
-  MONGODB_ATLAS_PUBLIC_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}
-  MONGODB_ATLAS_ORG: ${{ secrets.MONGODB_ATLAS_ORG }}
-  SLACK_URL: ${{ secrets.SLACK_URL }}
+  GITHUB_TOKEN: ${{ secrets.CHAMP_TESTING_GITHUB_TOKEN }}
+  GITHUB_OWNER: "champ-testing"
 
 defaults:
   run:
