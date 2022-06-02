@@ -14,7 +14,7 @@ env:
   TF_INPUT: false
   TF_IN_AUTOMATION: true
   GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}
-  GITHUB_OWNER: "champ-oss"
+  GITHUB_OWNER: "champ-testing"
 
 defaults:
   run:
