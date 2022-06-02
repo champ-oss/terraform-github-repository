@@ -6,6 +6,7 @@ module "test1" {
   from_template                 = true
   template_owner                = "champ-oss"
   template_repository           = "terraform-module-template"
+  visibility                    = "public"
 }
 
 # Create repo from scratch
@@ -14,4 +15,5 @@ module "test2" {
   name                          = "terraform-github-repository-test2"
   required_pull_request_reviews = false
   from_template                 = false
+  visibility                    = "public"
 }
