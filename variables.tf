@@ -133,7 +133,7 @@ variable "required_status_checks" {
 variable "required_status_checks_strict" {
   description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/branch_protection#strict"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "dismiss_stale_reviews" {
