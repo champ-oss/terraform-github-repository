@@ -55,6 +55,7 @@ resource "github_branch_protection" "this" {
       dismissal_restrictions          = var.dismissal_restrictions
       require_code_owner_reviews      = var.require_code_owner_reviews
       required_approving_review_count = var.required_approving_review_count
+      pull_request_bypassers          = var.pull_request_bypassers
     }
   }
 }

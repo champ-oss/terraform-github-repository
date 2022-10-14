@@ -130,6 +130,12 @@ variable "required_status_checks" {
   default     = []
 }
 
+variable "pull_request_bypassers" {
+  description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/branch_protection#pull_request_bypassers"
+  type        = list(string)
+  default     = []
+}
+
 variable "required_status_checks_strict" {
   description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/branch_protection#strict"
   type        = bool
