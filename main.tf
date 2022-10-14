@@ -24,7 +24,7 @@ resource "github_repository" "this" {
   lifecycle {
     prevent_destroy = true
     # Imported repos can show perpetual drift for the template
-    ignore_changes = [template, description, branches]
+    ignore_changes = [template, description]
   }
 }
 
@@ -55,6 +55,7 @@ resource "github_branch_protection" "this" {
       dismissal_restrictions          = var.dismissal_restrictions
       require_code_owner_reviews      = var.require_code_owner_reviews
       required_approving_review_count = var.required_approving_review_count
+      pull_request_bypassers          = var.pull_request_bypassers
     }
   }
 }
