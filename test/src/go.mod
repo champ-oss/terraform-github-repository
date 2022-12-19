@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/google/go-github/v42 v42.0.0
-	github.com/gruntwork-io/terratest v0.41.3
+	github.com/gruntwork-io/terratest v0.41.7
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c
 )
