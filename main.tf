@@ -24,7 +24,7 @@ resource "github_repository" "this" {
   lifecycle {
     prevent_destroy = true
     # Imported repos can show perpetual drift for the template
-    ignore_changes = [template, description, branches]
+    ignore_changes = [template, description]
   }
 }
 
