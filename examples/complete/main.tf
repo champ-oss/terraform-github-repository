@@ -7,6 +7,7 @@ module "test1" {
   template_owner                = "champ-oss"
   template_repository           = "terraform-module-template"
   visibility                    = "public"
+  archive_on_destroy            = false
 }
 
 # Create repo from scratch
@@ -16,4 +17,5 @@ module "test2" {
   required_pull_request_reviews = false
   from_template                 = false
   visibility                    = "public"
+  archive_on_destroy            = false
 }
