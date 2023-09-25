@@ -12,6 +12,7 @@ resource "github_repository" "this" {
   has_downloads          = var.has_downloads
   archive_on_destroy     = var.archive_on_destroy
   vulnerability_alerts   = var.vulnerability_alerts
+  archived               = var.archived
 
   dynamic "template" {
     for_each = var.from_template ? [1] : []
