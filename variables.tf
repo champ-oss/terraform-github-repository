@@ -177,3 +177,9 @@ variable "push_restrictions" {
   type        = list(string)
   default     = []
 }
+
+variable "archived" {
+  description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository#archived"
+  type        = bool
+  default     = false
+}
