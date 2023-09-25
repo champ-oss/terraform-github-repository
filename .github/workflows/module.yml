@@ -5,6 +5,8 @@ on:
   push:
     branches-ignore:
       - main
+    paths-ignore:
+      - 'README.md'
   schedule:
     - cron: "0 7 * * *"
 
@@ -13,56 +15,128 @@ concurrency: this
 env:
   TF_INPUT: false
   TF_IN_AUTOMATION: true
+  TF_STATE_BUCKET: "env-tfbackend-oss-backend"
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  MONGODB_ATLAS_PRIVATE_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}
+  MONGODB_ATLAS_PUBLIC_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}
+  MONGODB_ATLAS_ORG: ${{ secrets.MONGODB_ATLAS_ORG }}
+  SLACK_URL: ${{ secrets.SLACK_URL }}
+  NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+  NEW_RELIC_REGION: ${{ secrets.NEW_RELIC_REGION }}
+  NEW_RELIC_ACCOUNT_ID: ${{ secrets.NEW_RELIC_ACCOUNT_ID }}
   GITHUB_TOKEN: ${{ secrets.CHAMP_TESTING_GITHUB_TOKEN }}
   GITHUB_OWNER: "champ-testing"
 
-defaults:
-  run:
-    shell: bash
-    working-directory: test/src
-
 jobs:
-  list-tests:
+  list-examples:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: set-matrix
-        run: echo "::set-output name=matrix::$(go test -list Test | grep -v " " | jq -Rsc '. / "\n" - [""]')"
-
-  run-test:
-    needs: list-tests
+        working-directory: examples
+        run: |
+          EXAMPLES=$(ls -1 | jq -Rsc '. / "\n" - [""]')
+          echo $EXAMPLES
+          echo "EXAMPLES=$EXAMPLES" >> $GITHUB_OUTPUT
+    outputs:
+      EXAMPLES: ${{ steps.set-matrix.outputs.EXAMPLES }}
+  run-example:
+    needs: list-examples
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        testcase: ${{fromJSON(needs.list-tests.outputs.matrix)}}
+        EXAMPLES: ${{ fromJson(needs.list-examples.outputs.EXAMPLES) }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: examples/${{ matrix.EXAMPLES }}
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
       - uses: hashicorp/setup-terraform@v2.0.3 # https://github.com/hashicorp/setup-terraform/releases
         with:
-          terraform_version: 1.1.4 # https://github.com/hashicorp/terraform/releases
+          terraform_version: 1.5.5 # https://github.com/hashicorp/terraform/releases
           terraform_wrapper: false
-
-      - uses: actions/setup-go@v4
-        with:
-          go-version: 1.17
-
-      - name: Terratest
+      - name: copy lockfile
+        run: cp ../complete/.terraform.lock.hcl . || true
+      - name: init
+        run: terraform init
+      - name: disable prevent_destroy
+        working-directory: .
+        run: find . -type f -name '*.tf' -exec sed -i'' -e 's/prevent_destroy = true/prevent_destroy = false/g' {} +
+      - name: validate
+        run: terraform validate
+      - name: plan
+        run: terraform plan -out=tfplan
+      - name: apply
+        run: terraform apply -auto-approve tfplan
+      - name: check
+        run: terraform plan -detailed-exitcode
+      - name: integration test
         run: |
-          export TF_INPUT=${TF_INPUT:-false}
-          export TF_IN_AUTOMATION=${TF_IN_AUTOMATION:-true}
-          export TF_VAR_git=`echo ${GITHUB_REPOSITORY} | sed -e 's|.*/||'`
-          export TF_VAR_branch=$(git branch --show-current)
-          export PULL_REQUEST_HEAD_SHA=${{ github.event.pull_request.head.sha }}
-          go mod download
-          go test -v -timeout 90m -run ${{ matrix.testcase }}
-
+          for row in $(echo $(terraform output -json) | jq -c '. | to_entries[]'); do
+            key=$(echo $row | jq -r '.key' | tr '[:lower:]' '[:upper:]')
+            value=$(echo $row | jq -r '.value.value' | tr -d '\n[]" ')
+            echo $key=$value
+            export $key=$value
+          done
+          if [ -f test.sh ]; then bash test.sh; fi
+      - name: destroy
+        if: always()
+        run: terraform destroy -auto-approve
+  check-examples:
+    needs: run-example
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - id: setoutput
+        working-directory: .
+        run: echo "SUCCESS=true" >> $GITHUB_OUTPUT
+    outputs:
+      SUCCESS: ${{ steps.setoutput.outputs.SUCCESS }}
   module:
     runs-on: ubuntu-latest
-    needs: run-test
+    if: always()
+    needs: [run-example, check-examples]
     steps:
-    - run: echo Done!
-      working-directory: .
+      - name: module
+        working-directory: .
+        run: |
+          passed="${{ needs.check-examples.outputs.SUCCESS }}"
+          if [[ $passed == "true" ]]; then
+            echo "tests passed"
+            exit 0
+          else
+            echo "tests failed"
+            exit 1
+          fi
+  github-issue-notification:
+    needs: [ module ]
+    if: failure() && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: set-env-info
+        run: |
+          echo "GIT_REPO=$(echo ${GITHUB_REPOSITORY} | sed -e 's|.*/||')" >> $GITHUB_ENV
+          echo "GITHUB_WORKFLOW_NAME=$(echo ${GITHUB_WORKFLOW} | sed -e 's|.*/||')" >> $GITHUB_ENV
+          echo "GITHUB_REF_NAME=$(echo ${GITHUB_REF_NAME})" >> $GITHUB_ENV
+      - name: github-issue-notification
+        uses: champ-oss/action-github-issue-notification@v1.0.0-421559f
+        with:
+          GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}
+          GITHUB_ORG: champ-oss
+          GITHUB_REPO: ${{ env.GIT_REPO }}
+          GITHUB_CUSTOM_LABEL: ${{ env.GITHUB_WORKFLOW_NAME }}
+          GITHUB_BRANCH_LABEL: ${{ env.GITHUB_REF_NAME }}

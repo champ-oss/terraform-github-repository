@@ -183,3 +183,9 @@ variable "archived" {
   type        = bool
   default     = false
 }
+
+variable "allow_update_branch" {
+  description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository#allow_update_branch"
+  type        = bool
+  default     = true
+}
