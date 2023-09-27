@@ -8,6 +8,9 @@ module "test1" {
   template_repository           = "terraform-module-template"
   visibility                    = "public"
   archive_on_destroy            = false
+  actions_variables = {
+    "test-variable" : "value123"
+  }
 }
 
 # Create repo from scratch

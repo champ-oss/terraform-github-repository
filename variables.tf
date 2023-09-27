@@ -189,3 +189,9 @@ variable "allow_update_branch" {
   type        = bool
   default     = true
 }
+
+variable "actions_variables" {
+  description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_variable"
+  type        = map(string)
+  default     = {}
+}
