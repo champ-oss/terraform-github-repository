@@ -9,7 +9,7 @@ module "test1" {
   visibility                    = "public"
   archive_on_destroy            = false
   actions_variables = {
-    "test-variable" : "value123"
+    "test_variable" : "value123"
   }
 }
 
