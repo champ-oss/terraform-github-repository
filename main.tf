@@ -14,6 +14,7 @@ resource "github_repository" "this" {
   vulnerability_alerts   = var.vulnerability_alerts
   archived               = var.archived
   allow_update_branch    = var.allow_update_branch
+  is_template            = var.is_template
 
   dynamic "template" {
     for_each = var.from_template ? [1] : []
