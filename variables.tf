@@ -195,3 +195,9 @@ variable "actions_variables" {
   type        = map(string)
   default     = {}
 }
+
+variable "is_template" {
+  description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository#is_template"
+  type        = bool
+  default     = false
+}
