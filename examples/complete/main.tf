@@ -1,3 +1,7 @@
+terraform {
+  required_version = ">= 1.5.0"
+}
+
 # Create repo from template repository
 module "test1" {
   source                        = "../../"
