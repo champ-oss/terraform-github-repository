@@ -190,6 +190,12 @@ variable "allow_update_branch" {
   default     = true
 }
 
+variable "require_conversation_resolution" {
+  description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/branch_protection#require_conversation_resolution"
+  type        = bool
+  default     = false
+}
+
 variable "actions_variables" {
   description = "https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_variable"
   type        = map(string)

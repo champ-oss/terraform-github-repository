@@ -38,13 +38,14 @@ resource "github_branch_default" "this" {
 }
 
 resource "github_branch_protection" "this" {
-  repository_id           = github_repository.this.node_id
-  pattern                 = var.default_branch
-  enforce_admins          = var.enforce_admins
-  require_signed_commits  = var.require_signed_commits
-  required_linear_history = var.required_linear_history
-  allows_force_pushes     = var.allows_force_pushes
-  push_restrictions       = var.push_restrictions
+  repository_id                   = github_repository.this.node_id
+  pattern                         = var.default_branch
+  enforce_admins                  = var.enforce_admins
+  require_signed_commits          = var.require_signed_commits
+  required_linear_history         = var.required_linear_history
+  allows_force_pushes             = var.allows_force_pushes
+  push_restrictions               = var.push_restrictions
+  require_conversation_resolution = var.require_conversation_resolution
 
   required_status_checks {
     strict   = var.required_status_checks_strict
